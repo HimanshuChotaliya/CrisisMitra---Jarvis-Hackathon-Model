@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+<body>
+    <header>
+        {% block header %} 
+           <a
+            href="{{url_for('dashboard')}}"
+            class="bg-blue-600 text-white px-4 py-2 rounded-full text-sm flex items-center gap-2"
+          >
+              <i data-feather="activity" class="w-4 h-4"></i>
+              <span data-i18n="dashboard">Dashboard</span>
+            </a>
+        {% endblock %}
+    
+    </header>
+    <main>
+        {% block content %}
+
+        {% endblock %}
+    </main>
+    
+</body>
+
+
