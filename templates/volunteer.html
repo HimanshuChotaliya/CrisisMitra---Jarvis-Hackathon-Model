@@ -71,10 +71,19 @@
       </div>
     </header>
 
-    <main class="max-w-6xl mx-auto px-4 py-8">
+    <main class="max-w-6xl mx-auto px-0 py-8">
       <div class="flex flex-col md:flex-row gap-8">
         <!-- Volunteer Profile -->
+         
         <div class="md:w-1/3">
+          {% for vol in vol_info %}
+          <div class="active-mission card p-4 rounded-xl mb-6 border-l-4 border-blue-500">
+            <h2 class="text-xl font-medium" data-i18n="volunteer_lg">
+              Volunteers in {{vol.loc}}
+            </h2>
+          </div>
+
+
           <div class="card p-6 rounded-xl mb-6">
             <div class="flex items-center gap-4 mb-6">
               <div
@@ -83,11 +92,11 @@
                 <i data-feather="user" class="w-8 h-8"></i>
               </div>
               <div>
-                <h2 class="text-xl font-medium" data-i18n="volunteer_name">
-                  Volunteer Name
+                <h2 class="text-xl font-medium" >
+                  {{vol.fname}} {{vol.lname}}
                 </h2>
-                <p class="text-[#D3D3D3] text-sm" data-i18n="joined">
-                  Joined 3 months ago
+                <p class="text-[#D3D3D3] text-sm" >
+                  Joined on {{vol.date}}
                 </p>
               </div>
             </div>
@@ -127,52 +136,25 @@
                     data-i18n="cert_emt"
                     >EMT-B</span
                   >
+                  
+                  
+                  
                 </div>
+                
+              </div>
+              <div>
+                <a href="{{url_for('certify', volid=vol.id)}}" class="text-sm text-[#D3D3D3] bg-blue-600 rounded-lg p-2"  >Edit Skill</a>
+                
               </div>
             </div>
           </div>
+          {% endfor %}
 
           <!-- Training -->
-          <div class="card p-6 rounded-xl">
-            <h3 class="text-lg font-medium mb-4 flex items-center gap-2">
-              <i data-feather="award" class="w-5 h-5"></i>
-              <span data-i18n="training">Training</span>
-            </h3>
-            <div class="space-y-4">
-              <div class="flex items-start gap-3">
-                <div
-                  class="training-badge w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
-                >
-                  <i data-feather="check" class="w-4 h-4"></i>
-                </div>
-                <div>
-                  <h4 class="font-medium" data-i18n="train_basic">
-                    Basic First Aid
-                  </h4>
-                  <p class="text-sm text-[#D3D3D3]" data-i18n="completed_2w">
-                    Completed 2 weeks ago
-                  </p>
-                </div>
-              </div>
-              <div class="flex items-start gap-3">
-                <div
-                  class="training-badge w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
-                >
-                  <i data-feather="check" class="w-4 h-4"></i>
-                </div>
-                <div>
-                  <h4 class="font-medium" data-i18n="train_communication">
-                    Crisis Communication
-                  </h4>
-                  <p class="text-sm text-[#D3D3D3]" data-i18n="completed_1m">
-                    Completed 1 month ago
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
+          
         </div>
-
+        
+        {% for sos in sos_info %}
         <!-- Main Content -->
         <div class="md:w-2/3">
           <!-- Active Mission -->
@@ -196,17 +178,17 @@
                 <p class="text-sm text-[#D3D3D3]" data-i18n="location">
                   Location
                 </p>
-                <p class="font-medium">12.3456° N, 98.7654° W</p>
+                <p class="font-medium">{{area}}</p>
               </div>
               <div>
                 <p class="text-sm text-[#D3D3D3]" data-i18n="team">Team</p>
                 <p class="font-medium">Medical Response Unit #4</p>
               </div>
               <div>
-                <p class="text-sm text-[#D3D3D3]" data-i18n="started">
-                  Started
+                <p class="text-sm text-[#D3D3D3]" >
+                  Started {{sos.date}}
                 </p>
-                <p class="font-medium">2 hours ago</p>
+                <p class="font-medium">{{sos}}</p>
               </div>
               <div>
                 <p class="text-sm text-[#D3D3D3]" data-i18n="priority">
@@ -220,13 +202,13 @@
               <p class="text-sm text-[#D3D3D3]" data-i18n="mission_details">
                 Mission Details
               </p>
-              <p class="font-medium" data-i18n="mission_text">
-                Provide first aid and evacuation for earthquake victims in
-                downtown area. Multiple casualties reported.
+              <p class="font-medium" >
+                {{sos.emergency}} {{sos.add_detail}}
               </p>
             </div>
           </div>
         </div>
+        {% endfor %}
       </div>
     </main>
 
