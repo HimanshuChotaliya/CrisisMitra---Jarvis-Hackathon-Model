@@ -6,10 +6,14 @@ from sqlalchemy import Integer, String
 from flask_login import LoginManager , login_user, logout_user, current_user, login_required, UserMixin
 import os
 import spacy   # your existing module
+import requests
+from requests.structures import CaseInsensitiveDict
+from datetime import date
 
 app = Flask(__name__)
 app.config['SECRET_KEY']='your_secret_key_here'
 app.config["SQLALCHEMY_DATABASE_URI"]='sqlite:///site.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db=SQLAlchemy(app)
 login_manager=LoginManager()
@@ -40,19 +44,53 @@ class Sos(UserMixin, db.Model):
     emergency_type: Mapped[str] = mapped_column(String(50), nullable=False)
     add_detail: Mapped[str | None] = mapped_column(String(300), nullable=True)
     evidence_path: Mapped[str | None] = mapped_column(String(300), nullable=True, comment="Saved file path")
+    date = db.Column(db.Date, nullable=False)
 
-class Volunteer(UserMixin,db.Model):
-    __tablename__='volunteers'
-    id : Mapped[int]=mapped_column(Integer, primary_key=True)
-    fname : Mapped[str] = mapped_column(String, nullable=False)
-    lname : Mapped[str] = mapped_column(String, nullable=False)
-    email : Mapped[str] = mapped_column(String, nullable=False)
 
-    password: Mapped[str] = mapped_column(String, nullable=False)   
-    
+volunteers_skill = db.Table(
+    'volunteers_skill',
+    db.Column('volunteer_id', db.Integer, db.ForeignKey('volunteers.id'), primary_key=True),
+    db.Column('skill_id', db.Integer, db.ForeignKey('skill.id'), primary_key=True)
+)
+
+class Volunteer(UserMixin, db.Model):
+    __tablename__ = 'volunteers'
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    fname: Mapped[str] = mapped_column(String, nullable=False)
+    lname: Mapped[str] = mapped_column(String, nullable=False)
+    email: Mapped[str] = mapped_column(String, nullable=False)
+    loc = db.Column(db.String(15),nullable=False)
+    date = db.Column(db.Date, nullable=False)
+    password: Mapped[str] = mapped_column(String, nullable=False)
+
+    skills: Mapped[list["Skill"]] = db.relationship(
+        secondary=volunteers_skill,
+        back_populates="volunteers"
+    )
+
+
+class Skill(db.Model):
+    __tablename__ = 'skill'
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    skill_name: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
+
+    volunteers: Mapped[list["Volunteer"]] = db.relationship(
+        secondary=volunteers_skill,
+        back_populates="skills"
+    )
+
+
 with app.app_context():
     db.create_all()
 
+# with app.app_context():
+#     to_be_added=['First Aid','Search & Rescue', 'Translation', 'CPR Certified', 'EMT-B']
+#     for entry in to_be_added:
+#         new_skill=Skill(skill_name=entry)
+#         db.session.add(new_skill)
+#         db.session.commit()
 
 
 @app.route('/')
@@ -108,6 +146,7 @@ def sos():
 
         UPLOAD_FOLDER = "static/assets/img"
         os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+        todayis = date.today()
 
         evidence_path = None
         if file and file.filename != "":
@@ -122,7 +161,8 @@ def sos():
             location=location,
             emergency_type=emergency_type,
             add_detail=add_detail,
-            evidence_path=evidence_path
+            evidence_path=evidence_path,
+            date=todayis
         )
 
         db.session.add(report)
@@ -167,8 +207,10 @@ def volunteer_signup():
         fname=request.form.get('fname')
         lname=request.form.get('lname')
         email=request.form.get('email')
+        loc=request.form.get('loc')
         password=request.form.get('password')
         cpassword=request.form.get('cpassword')
+        todayis = date.today()
         user = db.session.execute(db.select(Volunteer).where(Volunteer.email==email)).scalar()
         if password!=cpassword:
             return redirect(url_for('volunteer_signup'))
@@ -178,9 +220,11 @@ def volunteer_signup():
 
         else:
             newv=Volunteer(fname=fname,
-                           lname=lname,
-                           email=email,
-                           password=password)
+                            lname=lname,
+                            email=email,
+                            loc=loc,
+                            password=password,
+                            date=todayis)
             db.session.add(newv)
             db.session.commit()
             login_user(newv)
@@ -194,7 +238,7 @@ def volunteer_login():
         email=request.form.get('email')
         password=request.form.get('password')
         remember=request.form.get('remember')
-        print("1111111111111111111111111111111111111111")
+        
         result = db.session.execute(db.select(Volunteer).where(Volunteer.email==email)).scalar()
         if result and result.password==password:
             return redirect(url_for('volunteer'))          
@@ -202,7 +246,68 @@ def volunteer_login():
 
 @app.route('/volunteer')
 def volunteer():
-    return render_template('volunteer.html')
+    vol_info=db.session.execute(db.select(Volunteer).order_by(Volunteer.id)).scalars().all()
+    sos_info=db.session.execute(db.select(Sos).order_by(Sos.id)).scalars().all()
+    for y in sos_info:
+        coords=y.location
+        lat, lon = [float(x.strip()) for x in coords.split(",")]
+        url = f"https://nominatim.openstreetmap.org/reverse"
+        parameters = {
+            "lat": lat,
+            "lon": lon,
+            "format": "json",
+            "zoom": 18,
+            "addressdetails": 1
+        }
+        headers = {
+            "User-Agent": "CrisisMitra/1.0 (contact: himanshu746h@gmail.com)"
+        }
+
+        response = requests.get(url, params=parameters,headers=headers, timeout=10)
+
+        
+        data=response.json()
+        area_name=data['address']['suburb']
+    return render_template('volunteer.html',vol_info=vol_info,sos_info=sos_info,area=area_name )
+
+@app.route('/evaluate/<int:volid>', methods=["GET", "POST"])
+def certify(volid):
+    volid=volid
+    
+    if request.method =='POST':
+        
+        responses = [
+            request.form.get('first_aid'),
+            request.form.get('search'),
+            request.form.get('cpr_certified'),
+            request.form.get('emtb')
+        ]
+
+        listed_skills = [
+            'First Aid',
+            'Search & Rescue',
+            'CPR Certified',
+            'EMT-B'
+        ]
+        
+
+        
+        person = db.session.execute(db.select(Volunteer).where(Volunteer.id==volid)).scalar()
+
+        
+
+        for response, skill_name in zip(responses, listed_skills):
+            if response == "yes":
+                skill = Skill.query.filter_by(skill_name=skill_name).first()
+
+                if skill not in person.skills:
+                    person.skills.append(skill)
+
+        db.session.commit()
+        return redirect(url_for('volunteer'))
+
+    return render_template('certify.html', volid=volid)
+
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, use_reloader=False)
