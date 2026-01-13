@@ -83,7 +83,7 @@
             </h2>
           </div>
 
-
+          
           <div class="card p-6 rounded-xl mb-6">
             <div class="flex items-center gap-4 mb-6">
               <div
@@ -101,45 +101,28 @@
               </div>
             </div>
             <div class="space-y-4">
-              <div>
-                <p class="text-sm text-[#D3D3D3]" data-i18n="skills">Skills</p>
-                <div class="flex flex-wrap gap-2 mt-2">
-                  <span
-                    class="bg-blue-600/20 text-blue-400 px-3 py-1 rounded-full text-xs"
-                    data-i18n="skill_firstaid"
-                    >First Aid</span
-                  >
-                  <span
-                    class="bg-blue-600/20 text-blue-400 px-3 py-1 rounded-full text-xs"
-                    data-i18n="skill_rescue"
-                    >Search & Rescue</span
-                  >
-                  <span
-                    class="bg-blue-600/20 text-blue-400 px-3 py-1 rounded-full text-xs"
-                    data-i18n="skill_translation"
-                    >Translation</span
-                  >
-                </div>
-              </div>
+              
               <div>
                 <p class="text-sm text-[#D3D3D3]" data-i18n="certifications">
-                  Certifications
+                  Skills
                 </p>
+                
                 <div class="flex flex-wrap gap-2 mt-2">
+                  {% for skill in vol.skills %}
                   <span
-                    class="bg-green-600/20 text-green-400 px-3 py-1 rounded-full text-xs"
-                    data-i18n="cert_cpr"
-                    >CPR Certified</span
+                    class="bg-green-600/20 text-green-4
+                    00 px-3 py-1 rounded-full text-xs"
+                    
+                    >{{skill.skill_name}}</span
                   >
-                  <span
-                    class="bg-green-600/20 text-green-400 px-3 py-1 rounded-full text-xs"
-                    data-i18n="cert_emt"
-                    >EMT-B</span
-                  >
+                  {% endfor %}
+                  
+                  
                   
                   
                   
                 </div>
+                
                 
               </div>
               <div>
@@ -148,6 +131,7 @@
               </div>
             </div>
           </div>
+          
           {% endfor %}
 
           <!-- Training -->
