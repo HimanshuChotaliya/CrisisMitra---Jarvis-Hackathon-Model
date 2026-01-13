@@ -248,6 +248,7 @@ def volunteer_login():
 def volunteer():
     vol_info=db.session.execute(db.select(Volunteer).order_by(Volunteer.id)).scalars().all()
     sos_info=db.session.execute(db.select(Sos).order_by(Sos.id)).scalars().all()
+    
     for y in sos_info:
         coords=y.location
         lat, lon = [float(x.strip()) for x in coords.split(",")]
@@ -293,6 +294,7 @@ def certify(volid):
 
         
         person = db.session.execute(db.select(Volunteer).where(Volunteer.id==volid)).scalar()
+        print(person)
 
         
 
