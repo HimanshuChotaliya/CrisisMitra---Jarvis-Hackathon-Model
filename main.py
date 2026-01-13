@@ -305,6 +305,12 @@ def certify(volid):
                 if skill not in person.skills:
                     person.skills.append(skill)
 
+            if response == "no":
+                skill = Skill.query.filter_by(skill_name=skill_name).first()
+
+                if skill in person.skills:
+                    person.skills.remove(skill)
+                        
         db.session.commit()
         return redirect(url_for('volunteer'))
 
