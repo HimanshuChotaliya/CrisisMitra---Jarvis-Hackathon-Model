@@ -28,13 +28,14 @@ class User(UserMixin,db.Model):
     __tablename__='users'
     id : Mapped[int]=mapped_column(Integer, primary_key=True)
     fullname : Mapped[str] = mapped_column(String, nullable=False)
-    contact: Mapped[str] = mapped_column(String, nullable=False)
-    email:Mapped[str] = mapped_column(String, nullable=False)
+    contact: Mapped[str] = mapped_column(String, nullable=False,unique=True)
+    email:Mapped[str] = mapped_column(String, nullable=False,unique=True)
     address:Mapped[str] = mapped_column(String, nullable=True)
     contact1name:Mapped[str] = mapped_column(String, nullable=True)
     contact1phone:Mapped[str] = mapped_column(String, nullable=True)
     contact2name:Mapped[str] = mapped_column(String, nullable=True)
     contact2phone:Mapped[str] = mapped_column(String, nullable=True)
+    password: Mapped[str] = mapped_column(String, nullable=False)
 
 class Sos(UserMixin, db.Model):
     __tablename__="sos_entries"
@@ -92,17 +93,30 @@ with app.app_context():
 #         db.session.add(new_skill)
 #         db.session.commit()
 
+@app.route('/',methods=['GET','POST'])
+def sign_to_cm():
+    if request.method == 'POST':
+        email=request.form.get("email")
+        password=request.form.get("password")
+        
+        person = db.session.execute(db.select(User).where(User.email==email)).scalar()
+        if person and person.password==password:
+            return redirect(url_for('home'))
 
-@app.route('/')
+        
+    return render_template('signin.html')
+
+@app.route('/crisismitra')
 def home():
     return render_template('index.html')
 
-@app.route("/signin", methods=["GET","POST"])
+@app.route("/signup", methods=["GET","POST"])
 def signin():
     if request.method == 'POST':
         fullname=request.form.get("yourname")
         contact=request.form.get("contact")
         email=request.form.get("email")
+        password=request.form.get("password")
         address=request.form.get("address")
         contact1name=request.form.get("contact1-name")
         contact1phone=request.form.get("contact1-phone")
@@ -111,12 +125,14 @@ def signin():
 
         user=db.session.execute(db.select(User).where(User.email==email)).scalar()
         if user:
-            return render_template('index.html')
+            return redirect(url_for('sign_to_cm'))
+        
 
         new_user=User(
             fullname = fullname,
             contact=contact,
             email=email,
+            password=password,
             address=address,
             contact1name=contact1name,
             contact1phone=contact1phone,
@@ -125,10 +141,10 @@ def signin():
         )
         db.session.add(new_user)
         db.session.commit()
-        login_user(new_user)
-        return render_template('index.html')
+        
+        return redirect(url_for('home'))
 
-    return render_template("signin.html")    
+    return render_template("register.html")    
 
 @app.route('/dashboard')
 def dashboard():
