@@ -33,55 +33,37 @@
   <div class="max-w-lg w-full bg-[#1A1A1A] p-8 rounded-2xl border border-[#333] shadow-lg">
     <div class="text-center mb-8">
       <i data-feather="user" class="w-10 h-10 mx-auto mb-3"></i>
-      <h1 class="text-3xl font-medium">Sign In / Register</h1>
-      <p class="text-[#D3D3D3] text-sm mt-2">Stay connected and save your emergency contacts</p>
+      <h1 class="text-3xl font-medium">Login</h1>
+      <p class="text-[#D3D3D3] text-sm mt-2">Enter your login details here.</p>
     </div>
 
-    <form id="signinForm" class="space-y-5" method="POST" action="/signin">
-      <div>
-        <label class="block mb-2">Full Name</label>
-        <input type="text" id="name" name="yourname" class="form-input" placeholder="Your name" required>
-      </div>
+    <form id="signinForm" class="space-y-5" method="POST" action="/">
 
       <div>
-        <label class="block mb-2">Phone Number</label>
-        <input type="tel" id="phone" name="contact" class="form-input" placeholder="+91 9876543210" required>
+        <label class="block mb-2">Email</label>
+        <input type="email" id="email" name="email" class="form-input" placeholder="you@example.com" required>
       </div>
 
       <div>
-        <label class="block mb-2">Email (Optional)</label>
-        <input type="email" id="email" name="email" class="form-input" placeholder="you@example.com">
-      </div>
-
-      <div>
-        <label class="block mb-2">Address (Optional)</label>
-        <input type="text" id="address" name="address" class="form-input" placeholder="Your address">
-      </div>
-
-      <h2 class="text-xl font-medium mt-6 mb-2">Emergency Contacts</h2>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div>
-          <input type="text" id="contact1-name" name="contact1-name" class="form-input mb-2" placeholder="Contact 1 Name">
-          <input type="tel" id="contact1-phone" class="form-input" placeholder="Contact 1 Phone">
-        </div>
-        <div>
-          <input type="text" id="contact2-name" name="contact2-name" class="form-input mb-2" placeholder="Contact 2 Name">
-          <input type="tel" id="contact2-phone" name="contact2-phone" class="form-input" placeholder="Contact 2 Phone">
-        </div>
-      </div>
-
-      <div class="flex items-center gap-2 mt-4">
-        <input type="checkbox" id="remember" name="remember" class="accent-white">
-        <label for="remember" class="text-sm text-[#D3D3D3]">Remember me on this device</label>
+        <label class="block mb-2">Password</label>
+        <input type="password" id="password" name="password" class="form-input" placeholder="Your password" required>
       </div>
 
       <button
         type="submit"
         class="w-full bg-white text-black py-3 rounded-lg font-medium text-lg flex items-center justify-center gap-2 hover:bg-opacity-90 transition-all"
       >
-        <i data-feather="log-in"></i> Continue
+        <i data-feather="log-in"></i> Let me in!
       </button>
     </form>
+
+    <p class="text-center text-sm text-gray-400 mt-6">
+      Don't have an account? 
+      <a href="{{url_for('signin')}}" class="text-blue-400 hover:text-blue-300 font-medium">
+        Sign up
+      </a>
+    </p>
+    
 
     <p class="text-center text-[#888] text-sm mt-6">
       <a href="{{url_for('home')}}" class="hover:text-white transition-all">← Back to Home</a>
